@@ -1,38 +1,31 @@
+###Resolução do Método de Newton-Raphson
 import numpy as np
-import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
 
-def newton_raphson(f, g, x0, E=0.0001, N=30, output_box=None):
+def newton_raphson(f, g, x0, E=0.0001, N=30):
     """
-    Método de Newton-Raphson para encontrar raízes de funções.
-
-    Parâmetros:
     f  - Função da qual queremos encontrar a raiz.
     g  - Derivada da função f.
     x0 - Estimativa inicial da raiz.
     E  - Tolerância para critério de parada (default: 0.0001).
     N  - Número máximo de iterações (default: 30).
-    output_box - Caixa de texto para saída (opcional).
-
-    Retorna:
-    Aproximação da raiz da função f.
     """
+    historico_iteracoes = []
     for n in range(0, N):
         try:
             x_novo = x0 - f(x0) / g(x0)
         except ZeroDivisionError:
-            output_box.insert(tk.END, f'Divisão por zero na iteração {n}. Derivada é zero em x = {x0}.\n')
-            return None
+            historico_iteracoes.append(f'Divisão por zero na iteração {n}. Derivada é zero em x = {x0}.')
+            return None, historico_iteracoes
 
-        output_box.insert(tk.END, f'Iteração {n}: x = {x_novo:.15f}\n')
+        historico_iteracoes.append(f'Iteração {n}: x = {x_novo:.15f}')
 
         if abs((x_novo - x0) / x0) < E:
-            return x_novo
+            return x_novo, historico_iteracoes
 
         x0 = x_novo
 
-    output_box.insert(tk.END, 'Número máximo de iterações atingido.\n')
-    return x_novo
+    historico_iteracoes.append('Número máximo de iterações atingido.')
+    return x_novo, historico_iteracoes
 
 def f1(x):
     return x**5 - 6
@@ -45,6 +38,28 @@ def f2(x):
 
 def g2(x):
     return -2 * np.sin(x) - np.exp(x) / 2
+
+
+###Iterações
+
+
+def imprimir_iteracoes(historico_iteracoes, output_box):
+  """
+  Imprime o histórico das iterações na caixa de texto de saída.
+
+  Parâmetros:
+  historico_iteracoes - Lista com as mensagens de cada iteração.
+  output_box - Caixa de texto para saída.
+  """
+  for mensagem in historico_iteracoes:
+      output_box.insert(tk.END, f'{mensagem}\n')
+
+
+
+###Interface Visual
+
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext
 
 def calcular_raiz():
     try:
@@ -67,7 +82,8 @@ def calcular_raiz():
     output_box.delete('1.0', tk.END)
     output_box.insert(tk.END, f'Função: {descricao}\n')
     output_box.insert(tk.END, f'Com estimativa inicial x0 = {x0}:\n')
-    raiz = newton_raphson(f, g, x0, E, N, output_box)
+    raiz, historico_iteracoes = newton_raphson(f, g, x0, E, N)
+    imprimir_iteracoes(historico_iteracoes, output_box)
     if raiz is not None:
         output_box.insert(tk.END, f'Raiz encontrada para {descricao}: x = {raiz:.15f}\n')
     else:
