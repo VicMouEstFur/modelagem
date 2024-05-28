@@ -31,7 +31,11 @@ def solve_system():
     b = np.array(b)
 
     solution = gauss_elimination(a, b)
-    solution_text.set("Solução: " + ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(n)]))
+    result = ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(n)])
+    solution_entry.config(state=tk.NORMAL)
+    solution_entry.delete(0, tk.END)
+    solution_entry.insert(0, result)
+    solution_entry.config(state=tk.DISABLED)
 
 def create_matrix_entries():
     n = int(entry_n.get())
@@ -70,7 +74,7 @@ tk.Button(root, text="Resolver Sistema", command=solve_system).grid(row=1, colum
 frame_matrix = tk.Frame(root)
 frame_matrix.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 
-solution_text = tk.StringVar()
-tk.Label(root, textvariable=solution_text, font=("Arial", 14)).grid(row=3, column=0, columnspan=3, pady=10)
+solution_entry = tk.Entry(root, font=("Arial", 14), width=50, state=tk.DISABLED)
+solution_entry.grid(row=3, column=0, columnspan=3, pady=10)
 
 root.mainloop()
