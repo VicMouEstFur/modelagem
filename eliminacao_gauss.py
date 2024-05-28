@@ -9,18 +9,24 @@ def gauss_elimination(a, b):
         for i in range(k + 1, n):
             if a[i][k] == 0: continue
             factor = a[i][k] / a[k][k]
-            elimination_steps.append(f"Linha {i+1} - ({round(factor, 6)}) * Linha {k+1}")
+            elimination_steps.append(f"Linha {i+1} - ({round(factor, 4)}) * Linha {k+1}")
             for j in range(k, n):
                 a[i][j] -= factor * a[k][j]
             b[i] -= factor * b[k]
 
     x = np.zeros(n)
+    synthesis_steps = []
     for i in range(n - 1, -1, -1):
         sum_ax = 0
+        synthesis_expression = f"x{i+1} = {round(b[i], 4)}"
         for j in range(i + 1, n):
             sum_ax += a[i][j] * x[j]
+            synthesis_expression += f" - ({round(a[i][j], 4)}*{round(x[j], 4)})"
         x[i] = (b[i] - sum_ax) / a[i][i]
-    return x, elimination_steps
+        synthesis_expression += f" / {round(a[i][i], 4)} = {round(x[i], 4)}"
+        synthesis_steps.append(synthesis_expression)
+
+    return x, elimination_steps, synthesis_steps
 
 def solve_system():
     n = int(entry_n.get())
@@ -32,8 +38,8 @@ def solve_system():
     a = np.array(a)
     b = np.array(b)
 
-    solution, elimination_steps = gauss_elimination(a, b)
-    result = ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(n)])
+    solution, elimination_steps, synthesis_steps = gauss_elimination(a, b)
+    result = ", ".join([f"x{i+1} = {round(solution[i], 4)}" for i in range(n)])
 
     solution_entry.config(state=tk.NORMAL)
     solution_entry.delete(0, tk.END)
@@ -42,7 +48,7 @@ def solve_system():
 
     steps_text.config(state=tk.NORMAL)
     steps_text.delete("1.0", tk.END)
-    steps_text.insert(tk.END, "\n".join(elimination_steps))
+    steps_text.insert(tk.END, "\n".join(elimination_steps) + "\n\n" + "\n".join(synthesis_steps))
     steps_text.config(state=tk.DISABLED)
 
 def create_matrix_entries():
@@ -69,7 +75,7 @@ def create_matrix_entries():
     tk.Label(frame_matrix, text="Termos Independentes (B)").grid(row=0, column=n+1)
 
 root = tk.Tk()
-root.title("Eliminação de Gauss - Interface Simplificada")
+root.title("Eliminação de Gauss")
 
 tk.Label(root, text="Tamanho da matriz").grid(row=0, column=0, padx=10, pady=10)
 entry_n = tk.Entry(root, width=5)
@@ -84,7 +90,7 @@ frame_matrix.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 solution_entry = tk.Entry(root, font=("Arial", 14), width=50, state=tk.DISABLED)
 solution_entry.grid(row=3, column=0, columnspan=3, pady=10)
 
-steps_text = tk.Text(root, font=("Arial", 12), width=50, height=10, state=tk.DISABLED)
+steps_text = tk.Text(root, font=("Arial", 12), width=50, height=15, state=tk.DISABLED)
 steps_text.grid(row=4, column=0, columnspan=3, pady=10)
 
 root.mainloop()
