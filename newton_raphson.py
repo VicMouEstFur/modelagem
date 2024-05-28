@@ -14,23 +14,22 @@ def newton_raphson(f, g, x0, E=0.0001, N=30):
     Retorna:
     Aproximação da raiz da função f.
     """
-    iteracoes = []
     for n in range(0, N):
         try:
             x_novo = x0 - f(x0) / g(x0)
         except ZeroDivisionError:
             print(f'Divisão por zero na iteração {n}. Derivada é zero em x = {x0}.')
-            return None, iteracoes
+            return None
 
-        iteracoes.append(f'Iteração {n}: x = {x_novo:.15f}')
+        print(f'Iteração {n}: x = {x_novo:.15f}')
         
         if abs((x_novo - x0) / x0) < E:
-            return x_novo, iteracoes
+            return x_novo
         
         x0 = x_novo
     
     print('Número máximo de iterações atingido.')
-    return x_novo, iteracoes
+    return x_novo
 
 def f1(x):
     return x**5 - 6
@@ -44,6 +43,7 @@ def f2(x):
 def g2(x):
     return -2 * np.sin(x) - np.exp(x) / 2
 
+# Função para selecionar a equação
 def selecionar_equacao():
     print("Escolha a função para calcular a raiz:")
     print("1. x^5 - 6")
@@ -57,23 +57,13 @@ def selecionar_equacao():
         print("Escolha inválida. Tente novamente.")
         return selecionar_equacao()
 
-def main():
-    f, g, descricao = selecionar_equacao()
-    x0 = float(input("Digite o valor inicial (x0): "))
-    N = int(input("Digite o número máximo de iterações: "))
-    E = float(input("Digite o erro mínimo (tolerância): "))
+# Capturar entradas do usuário
+f, g, descricao = selecionar_equacao()
+x0 = float(input("Digite o valor inicial (x0): "))
+N = int(input("Digite o número máximo de iterações: "))
+E = float(input("Digite o erro mínimo (tolerância): "))
 
-    print(f'Função: {descricao}')
-    print(f'Com estimativa inicial x0 = {x0}:')
-    raiz, iteracoes = newton_raphson(f, g, x0, E, N)
-    
-    if raiz:
-        print(f'Raiz encontrada para {descricao}: x = {raiz:.15f}')
-    else:
-        print('Raiz não encontrada.')
-
-    for iteracao in iteracoes:
-        print(iteracao)
-
-if __name__ == "__main__":
-    main()
+print(f'Função: {descricao}')
+print(f'Com estimativa inicial x0 = {x0}:')
+raiz = newton_raphson(f, g, x0, E, N)
+print(f'Raiz encontrada para {descricao}: x = {raiz:.15f}' if raiz else 'Raiz não encontrada.')
