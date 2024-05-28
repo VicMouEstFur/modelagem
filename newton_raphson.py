@@ -1,40 +1,79 @@
 import numpy as np
 
-
 def newton_raphson(f, g, x0, E=0.0001, N=30):
-  for n in range(0, N):
-    x_novo = x0 - f(x0) / g(x0)
-    print(f'Iteração {n}: x = {x_novo}')
-    if abs((x_novo - x0)/x0)< E:
-      return x_novo
-    x0 = x_novo
+    """
+    Método de Newton-Raphson para encontrar raízes de funções.
+    
+    Parâmetros:
+    f  - Função da qual queremos encontrar a raiz.
+    g  - Derivada da função f.
+    x0 - Estimativa inicial da raiz.
+    E  - Tolerância para critério de parada (default: 0.0001).
+    N  - Número máximo de iterações (default: 30).
+    
+    Retorna:
+    Aproximação da raiz da função f.
+    """
+    iteracoes = []
+    for n in range(0, N):
+        try:
+            x_novo = x0 - f(x0) / g(x0)
+        except ZeroDivisionError:
+            print(f'Divisão por zero na iteração {n}. Derivada é zero em x = {x0}.')
+            return None, iteracoes
 
+        iteracoes.append(f'Iteração {n}: x = {x_novo:.15f}')
+        
+        if abs((x_novo - x0) / x0) < E:
+            return x_novo, iteracoes
+        
+        x0 = x_novo
+    
+    print('Número máximo de iterações atingido.')
+    return x_novo, iteracoes
 
 def f1(x):
-  return x**5 - 6
-
+    return x**5 - 6
 
 def g1(x):
-  return 5 * x**4
-
-
-print('x**5 - 6')
-x1 = 3
-print(f'x**5 - 6 com x0 = {x1}:')
-raiz_f1 = newton_raphson(f1, g1, x1)
-print(f'Raiz encontrada para f1: x = {raiz_f1}')
-
+    return 5 * x**4
 
 def f2(x):
-  return 2 * np.cos(x) - np.exp(x) / 2
-
+    return 2 * np.cos(x) - np.exp(x) / 2
 
 def g2(x):
-  return -2 * np.sin(x) - np.exp(x) / 2
+    return -2 * np.sin(x) - np.exp(x) / 2
 
+def selecionar_equacao():
+    print("Escolha a função para calcular a raiz:")
+    print("1. x^5 - 6")
+    print("2. 2 * cos(x) - exp(x) / 2")
+    escolha = int(input("Digite o número da sua escolha (1 ou 2): "))
+    if escolha == 1:
+        return f1, g1, "x^5 - 6"
+    elif escolha == 2:
+        return f2, g2, "2 * cos(x) - exp(x) / 2"
+    else:
+        print("Escolha inválida. Tente novamente.")
+        return selecionar_equacao()
 
-print(' ')
-x2 = -2
-print(f'2cosx-e^x/2 com x0 = {x2}:')
-raiz_f2 = newton_raphson(f2, g2, x2)
-print(f'Raiz encontrada para f2: x = {raiz_f2}')
+def main():
+    f, g, descricao = selecionar_equacao()
+    x0 = float(input("Digite o valor inicial (x0): "))
+    N = int(input("Digite o número máximo de iterações: "))
+    E = float(input("Digite o erro mínimo (tolerância): "))
+
+    print(f'Função: {descricao}')
+    print(f'Com estimativa inicial x0 = {x0}:')
+    raiz, iteracoes = newton_raphson(f, g, x0, E, N)
+    
+    if raiz:
+        print(f'Raiz encontrada para {descricao}: x = {raiz:.15f}')
+    else:
+        print('Raiz não encontrada.')
+
+    for iteracao in iteracoes:
+        print(iteracao)
+
+if __name__ == "__main__":
+    main()
