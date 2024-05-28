@@ -4,21 +4,35 @@ import numpy as np
 
 def gauss_elimination(a, b):
     n = len(b)
+    steps = []
+
+    # Fase de eliminação
     for k in range(n):
+        steps.append(f"Eliminação na coluna {k+1}:")
         for i in range(k + 1, n):
-            if a[i][k] == 0: continue
+            if a[k][k] == 0:
+                steps.append("Erro: pivô zero encontrado. Trocar linhas ou utilizar pivoteamento.")
+                return [], []
             factor = a[i][k] / a[k][k]
+            steps.append(f"Multiplicador de fila para eliminar x{k+1} da equação {i+1}: m{i+1}{k+1} = {factor:.6f}")
             for j in range(k, n):
                 a[i][j] -= factor * a[k][j]
             b[i] -= factor * b[k]
+            steps.append(f"Nova linha {i+1}: {a[i]}, {b[i]:.6f}")
 
+    steps.append("Matriz após a eliminação: ")
+    steps.append(np.array_str(a))
+    steps.append("Vetor b após a eliminação: ")
+    steps.append(np.array_str(b))
+
+    # Fase de substituição regressiva
     x = np.zeros(n)
     for i in range(n - 1, -1, -1):
-        sum_ax = 0
-        for j in range(i + 1, n):
-            sum_ax += a[i][j] * x[j]
+        sum_ax = sum(a[i][j] * x[j] for j in range(i + 1, n))
         x[i] = (b[i] - sum_ax) / a[i][i]
-    return x
+        steps.append(f"Solução de x{i+1}: (b{i+1} - soma_ax) / a[{i+1},{i+1}] = ({b[i]:.6f} - {sum_ax:.6f}) / {a[i][i]:.6f} = {x[i]:.6f}")
+
+    return x, steps
 
 def solve_system():
     n = int(entry_n.get())
@@ -30,12 +44,19 @@ def solve_system():
     a = np.array(a)
     b = np.array(b)
 
-    solution = gauss_elimination(a, b)
-    result = ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(n)])
+    solution, steps = gauss_elimination(a, b)
+    result = ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(len(solution))])
+
     solution_entry.config(state=tk.NORMAL)
     solution_entry.delete(0, tk.END)
     solution_entry.insert(0, result)
     solution_entry.config(state=tk.DISABLED)
+
+    steps_text.config(state=tk.NORMAL)
+    steps_text.delete(1.0, tk.END)
+    for step in steps:
+        steps_text.insert(tk.END, step + "\n")
+    steps_text.config(state=tk.DISABLED)
 
 def create_matrix_entries():
     n = int(entry_n.get())
@@ -76,5 +97,8 @@ frame_matrix.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 
 solution_entry = tk.Entry(root, font=("Arial", 14), width=50, state=tk.DISABLED)
 solution_entry.grid(row=3, column=0, columnspan=3, pady=10)
+
+steps_text = tk.Text(root, height=10, width=70, state=tk.DISABLED)
+steps_text.grid(row=4, column=0, columnspan=3, pady=10)
 
 root.mainloop()
