@@ -4,10 +4,12 @@ import numpy as np
 
 def gauss_elimination(a, b):
     n = len(b)
+    elimination_steps = []
     for k in range(n):
         for i in range(k + 1, n):
             if a[i][k] == 0: continue
             factor = a[i][k] / a[k][k]
+            elimination_steps.append(f"Linha {i+1} - ({round(factor, 6)}) * Linha {k+1}")
             for j in range(k, n):
                 a[i][j] -= factor * a[k][j]
             b[i] -= factor * b[k]
@@ -18,7 +20,7 @@ def gauss_elimination(a, b):
         for j in range(i + 1, n):
             sum_ax += a[i][j] * x[j]
         x[i] = (b[i] - sum_ax) / a[i][i]
-    return x
+    return x, elimination_steps
 
 def solve_system():
     n = int(entry_n.get())
@@ -30,12 +32,18 @@ def solve_system():
     a = np.array(a)
     b = np.array(b)
 
-    solution = gauss_elimination(a, b)
+    solution, elimination_steps = gauss_elimination(a, b)
     result = ", ".join([f"x{i+1} = {round(solution[i], 6)}" for i in range(n)])
+
     solution_entry.config(state=tk.NORMAL)
     solution_entry.delete(0, tk.END)
     solution_entry.insert(0, result)
     solution_entry.config(state=tk.DISABLED)
+
+    steps_text.config(state=tk.NORMAL)
+    steps_text.delete("1.0", tk.END)
+    steps_text.insert(tk.END, "\n".join(elimination_steps))
+    steps_text.config(state=tk.DISABLED)
 
 def create_matrix_entries():
     n = int(entry_n.get())
@@ -63,7 +71,6 @@ def create_matrix_entries():
 root = tk.Tk()
 root.title("Eliminação de Gauss - Interface Simplificada")
 
-# Interface simplificada
 tk.Label(root, text="Tamanho da matriz").grid(row=0, column=0, padx=10, pady=10)
 entry_n = tk.Entry(root, width=5)
 entry_n.grid(row=0, column=1, padx=10, pady=10)
@@ -76,5 +83,8 @@ frame_matrix.grid(row=2, column=0, columnspan=3, padx=10, pady=10)
 
 solution_entry = tk.Entry(root, font=("Arial", 14), width=50, state=tk.DISABLED)
 solution_entry.grid(row=3, column=0, columnspan=3, pady=10)
+
+steps_text = tk.Text(root, font=("Arial", 12), width=50, height=10, state=tk.DISABLED)
+steps_text.grid(row=4, column=0, columnspan=3, pady=10)
 
 root.mainloop()
